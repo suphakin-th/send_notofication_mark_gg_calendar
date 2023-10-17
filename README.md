@@ -72,4 +72,4 @@ source venv/bin/activate  # On Windows, use 'venv\Scripts\activate'
 python3 main.py
 ```
 
-** In @classmethod Name from_authorized_user_info fix it for read installed token and register first. **
+** In @classmethod Name from_authorized_user_info fix it for read installed token and register first. test**
