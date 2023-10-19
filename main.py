@@ -1,7 +1,6 @@
+import uuid
 import os
-
 import pyodbc
-import sqlite3
 import datetime
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
@@ -18,49 +17,68 @@ from googleapiclient.discovery import build
 
 # Google Calendar API Settings
 SCOPES = ['https://www.googleapis.com/auth/calendar']
-CLIENT_SECRET_FILE = 'client_secret.json'
+CLIENT_SECRET_FILE = 'client_secret_crm.json'
 API_NAME = 'calendar'
 API_VERSION = 'v3'
-CALENDAR_ID = 'suphakin.th@gmail.com'
+CALENDAR_ID = 'system.evo.crm@gmail.com'
 
-def get_sql_events():
-    # For local test
-    con = sqlite3.connect("events.db")
-    cur = con.cursor()
+def generate_unique_event_id():
+    return str(uuid.uuid4())
+
+# def get_sql_events():
+#     # For local test
+#     con = sqlite3.connect("events.db")
+#     cur = con.cursor()
     
-    cur.execute("SELECT * FROM events_table;")
-    events = cur.fetchall()
-    cur.close()
-    con.close()
+#     cur.execute("SELECT * FROM events_table;")
+#     events = cur.fetchall()
+#     cur.close()
+#     con.close()
 
     
-    # Connect to SQL Server and fetch events
-    # connection = pyodbc.connect(conn_str)
-    # cursor = connection.cursor()
+#     # Connect to SQL Server and fetch events
+#     # connection = pyodbc.connect(conn_str)
+#     # cursor = connection.cursor()
 
-    # cursor.execute('SELECT event_id, event_title, event_start_time, event_end_time FROM events_table')
-    # events = cursor.fetchall()
-    # print('xxx', events)
-    # cursor.close()
-    # connection.close()
+#     # cursor.execute('SELECT event_id, event_title, event_start_time, event_end_time FROM events_table')
+#     # events = cursor.fetchall()
+#     # print('xxx', events)
+#     # cursor.close()
+#     # connection.close()
 
-    return events
+#     return events
 
-def create_google_event(service, summary, start_time, end_time):
+def create_event(service, event_title, start_time, end_time, description, guest_emails):
+    attendees = [{'email': email} for email in guest_emails]
     event = {
-        'summary': summary,
-        'start': {'dateTime': start_time, 'timeZone': 'UTC'},
-        'end': {'dateTime': end_time, 'timeZone': 'UTC'},
+        'summary': event_title,
+        'description': description,
+        'start': {
+            'dateTime': start_time,
+            'timeZone': 'Asia/Bangkok',  # Thailand time zone
+        },
+        'end': {
+            'dateTime': end_time,
+            'timeZone': 'Asia/Bangkok',  # Thailand time zone
+        },
+        'attendees': attendees,
     }
 
-    service.events().insert(calendarId=CALENDAR_ID, body=event).execute()
+    # Insert the event directly specifying the calendarId
+    event = service.events().insert(calendarId='primary', body=event, sendUpdates='all').execute()
 
+    print('Event created: %s' % (event.get('htmlLink')))
+    
 def main():
+    # Connect to database and get data
+    """
     con = sqlite3.connect("events.db")
     cur = con.cursor()
 
     res = cur.execute("SELECT * FROM events_table;")
     res.fetchall()
+    """
+    
     # Connect to Google Calendar API
     creds = None
 
@@ -80,12 +98,14 @@ def main():
     service = build(API_NAME, API_VERSION, credentials=creds)
 
     # Get events from SQL Server
-    sql_events = get_sql_events()
-
-    # Create corresponding events in Google Calendar
-    for event_id, event_title, start_time, end_time in sql_events:
-        create_google_event(service, event_title, start_time, end_time)
-        print(f'Event {event_id} created in Google Calendar.')
-
+    ## sql_events = get_sql_events()
+    
+    # Mock data for test
+    event_title = 'Meeting with SUPER VIP'
+    start_time = '2023-10-20T09:00:00'
+    end_time = '2023-10-20T18:00:00'
+    description = 'Discussing important matters'
+    guest_emails = ['suphakin.th@gmail.com', 'system.evo.crm@gmail.com']
+    create_event(service, event_title, start_time, end_time, description, guest_emails)
 if __name__ == '__main__':
     main()

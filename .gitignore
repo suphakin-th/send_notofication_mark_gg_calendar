@@ -161,3 +161,4 @@ cython_debug/
 
 *.db
 client_secret.json
+*secret*
