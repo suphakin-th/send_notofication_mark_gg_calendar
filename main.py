@@ -47,6 +47,7 @@ def update_events(config: dict, event_id: str, link: str):
         cursor.execute(
             f"UPDATE compose_record SET is_gg_marked = TRUE, gg_link = '{link}' WHERE id = {event_id} AND rel_module = '353947921997627395' AND is_gg_marked = FALSE;"
         )
+        cursor.fetchall()
 
 
         # Fetch and print the results
@@ -165,7 +166,7 @@ def main():
                 print('RECORD_EVENT : ', event_data)
                 link = create_event(
                     service = service, 
-                    event_title = 'AUTO_EVENT : ' + str(event_data['Subject']) if event_data['Subject'] else 'AUTO_EVENT : NO SUBJECT',
+                    event_title = 'AUTO_EVENT : ' + str(event_data['Subject'][0]) if event_data['Subject'][0] else 'AUTO_EVENT : NO SUBJECT',
                     start_time = event_data['ActivityDate'],
                     end_time = event_data['EndDateTime'],
                     description = event_data['Description'],
