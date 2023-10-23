@@ -56,6 +56,7 @@ def get_sql_events(config):
     finally:
         # Close the cursor and connection
         if 'cursor' in locals() and cursor is not None:
+            cursor.fetchall()
             cursor.close()
         if 'connection' in locals() and connection is not None:
             connection.close()
