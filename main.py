@@ -164,7 +164,7 @@ def main():
                 print('RECORD_EVENT : ', event_data)
                 link = create_event(
                     service = service, 
-                    event_title = 'AUTO_EVENT : ' + event_data['Subject'] if event_data['Subject'] else 'AUTO_EVENT : NO SUBJECT', 
+                    event_title = 'AUTO_EVENT : ' + str(event_data['Subject']) if event_data['Subject'] else 'AUTO_EVENT : NO SUBJECT',
                     start_time = event_data['ActivityDate'],
                     end_time = event_data['EndDateTime'],
                     description = event_data['Description'],
