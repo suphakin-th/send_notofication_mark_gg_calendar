@@ -23,7 +23,7 @@ def read_config(file_path):
         config = json.load(file)
     return config
 
-def get_sql_events(config):
+def update_events(config):
     result = None
     database_config = {
         'user': config['database']['user'],
@@ -42,7 +42,7 @@ def get_sql_events(config):
         cursor = connection.cursor()
 
         # Example: Execute a simple query
-        cursor.execute("SELECT cr.values FROM compose_record cr WHERE rel_module = '353947921997627395' AND is_gg_marked = FALSE;")
+        cursor.execute("SELECT cr.id, cr.values FROM compose_record cr WHERE rel_module = '353947921997627395' AND is_gg_marked = FALSE;")
 
         # Fetch and print the results
         result = cursor.fetchall()
@@ -65,7 +65,49 @@ def get_sql_events(config):
             connection.close()
     return result
 
-def create_event(service, event_title, start_time, end_time, description, guest_emails):
+def get_sql_events(config):
+    result = None
+    database_config = {
+        'user': config['database']['user'],
+        'password': config['database']['password'],
+        'host': config['database']['host'],
+        'port': config['database']['port'],
+        'database': config['database']['database_name'],
+        'raise_on_warnings': True
+    }
+
+    try:
+        # Connect to the database
+        connection = mysql.connector.connect(**database_config)
+
+        # Create a cursor object to execute SQL queries
+        cursor = connection.cursor()
+
+        # Example: Execute a simple query
+        cursor.execute("SELECT cr.id, cr.values FROM compose_record cr WHERE rel_module = '353947921997627395' AND is_gg_marked = FALSE;")
+
+        # Fetch and print the results
+        result = cursor.fetchall()
+        for row in result:
+            print(row)
+        
+        if connection.is_connected() and result:
+            print("Connected to the database.")
+            return result
+
+
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+
+    finally:
+        # Close the cursor and connection
+        if 'cursor' in locals() and cursor is not None:
+            cursor.close()
+        if 'connection' in locals() and connection is not None:
+            connection.close()
+    return result
+
+def create_event(service, event_title, start_time, end_time, description, guest_emails, location):
     attendees = [{'email': email} for email in guest_emails]
     event = {
         'summary': event_title,
@@ -79,12 +121,13 @@ def create_event(service, event_title, start_time, end_time, description, guest_
             'timeZone': 'Asia/Bangkok',  # Thailand time zone
         },
         'attendees': attendees,
+        'location' : location
     }
 
     # Insert the event directly specifying the calendarId
     event = service.events().insert(calendarId='primary', body=event, sendUpdates='all').execute()
 
-    print('Event created: %s' % (event.get('htmlLink')))
+    return event.get('htmlLink')
     
 def main():
     # Connect to Google Calendar API
@@ -111,13 +154,29 @@ def main():
     if sql_events and isinstance(sql_events, list) and len(sql_events )>=1 :
         # Event from database
         for event in sql_events:
-            event_data = json.loads(event[0])
+            link = None
+            print('events : ', event)
+            print('ID : ', event[0])
+            print('event : ', event[1])
+            event_data = json.loads(event[1])
             # filter only event that have ActivityDate and EndDateTime
             if event_data['ActivityDate'] and event_data['EndDateTime']:
-                print(event_data)
+                print('RECORD_EVENT : ', event_data)
+                # link = create_event(
+                #     service = service, 
+                #     event_title = 'AUTO_EVENT : ' + event_data['Subject'] if event_data['Subject'] else 'AUTO_EVENT : NO SUBJECT', 
+                #     start_time = event_data['ActivityDate'],
+                #     end_time = event_data['EndDateTime'],
+                #     description = event_data['Description'],
+                #     guest_emails = event_data['ContactId'],
+                #     location = event_data['Location']
+                # )
             else:
                 continue
-            # create_event(service, event_title, start_time, end_time, description, guest_emails)
+            # Update SQL
+            if link:
+                pass
+                
     else:
         print("Get no data from connection")
     
