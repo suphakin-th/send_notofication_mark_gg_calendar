@@ -1,5 +1,6 @@
 import uuid
 import os
+import json
 import pyodbc
 import datetime
 from google.oauth2.credentials import Credentials
@@ -25,28 +26,51 @@ CALENDAR_ID = 'system.evo.crm@gmail.com'
 def generate_unique_event_id():
     return str(uuid.uuid4())
 
-# def get_sql_events():
-#     # For local test
-#     con = sqlite3.connect("events.db")
-#     cur = con.cursor()
-    
-#     cur.execute("SELECT * FROM events_table;")
-#     events = cur.fetchall()
-#     cur.close()
-#     con.close()
+def read_config(file_path):
+    with open(file_path, 'r') as file:
+        config = json.load(file)
+    return config
 
-    
-#     # Connect to SQL Server and fetch events
-#     # connection = pyodbc.connect(conn_str)
-#     # cursor = connection.cursor()
+def get_sql_events(config):
+    database_config = {
+        'user': config['database']['user'],
+        'password': config['database']['password'],
+        'host': config['database']['host'],
+        'port': config['database']['port'],
+        'database': config['database']['database_name'],
+        'raise_on_warnings': True
+    }
 
-#     # cursor.execute('SELECT event_id, event_title, event_start_time, event_end_time FROM events_table')
-#     # events = cursor.fetchall()
-#     # print('xxx', events)
-#     # cursor.close()
-#     # connection.close()
+    try:
+        # Connect to the database
+        connection = mysql.connector.connect(**database_config)
+        
+        if connection.is_connected():
+            print("Connected to the database.")
+            return connection
 
-#     return events
+        # Create a cursor object to execute SQL queries
+        cursor = connection.cursor()
+
+        # Example: Execute a simple query
+        cursor.execute("SELECT cr.values FROM compose_record cr WHERE rel_module = '353947921997627395';")
+
+        # Fetch and print the results
+        result = cursor.fetchall()
+        for row in result:
+            print(row)
+
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+
+    finally:
+        # Close the cursor and connection
+        if 'cursor' in locals() and cursor is not None:
+            cursor.close()
+        if 'connection' in locals() and connection is not None:
+            connection.close()
+
+    return events
 
 def create_event(service, event_title, start_time, end_time, description, guest_emails):
     attendees = [{'email': email} for email in guest_emails]
@@ -70,15 +94,6 @@ def create_event(service, event_title, start_time, end_time, description, guest_
     print('Event created: %s' % (event.get('htmlLink')))
     
 def main():
-    # Connect to database and get data
-    """
-    con = sqlite3.connect("events.db")
-    cur = con.cursor()
-
-    res = cur.execute("SELECT * FROM events_table;")
-    res.fetchall()
-    """
-    
     # Connect to Google Calendar API
     creds = None
 
@@ -98,14 +113,16 @@ def main():
     service = build(API_NAME, API_VERSION, credentials=creds)
 
     # Get events from SQL Server
-    ## sql_events = get_sql_events()
+    config = read_config('database_config.json')
+    sql_events = get_sql_events(config)
+    print(sql_events)
     
-    # Mock data for test
-    event_title = 'Meeting with SUPER VIP'
-    start_time = '2023-10-20T09:00:00'
-    end_time = '2023-10-20T18:00:00'
-    description = 'Discussing important matters'
-    guest_emails = ['suphakin.th@gmail.com', 'system.evo.crm@gmail.com']
-    create_event(service, event_title, start_time, end_time, description, guest_emails)
+    # # Mock data for test
+    # event_title = 'Meeting with SUPER VIP'
+    # start_time = '2023-10-20T09:00:00'
+    # end_time = '2023-10-20T18:00:00'
+    # description = 'Discussing important matters'
+    # guest_emails = ['suphakin.th@gmail.com', 'system.evo.crm@gmail.com']
+    # create_event(service, event_title, start_time, end_time, description, guest_emails)
 if __name__ == '__main__':
     main()
