@@ -26,7 +26,7 @@ def read_config(file_path):
     return config
 
 def update_events(config: dict, event_id: str, link: str):
-    result = None
+    result = False
     database_config = {
         'user': config['database']['user'],
         'password': config['database']['password'],
@@ -48,13 +48,11 @@ def update_events(config: dict, event_id: str, link: str):
                 f"UPDATE compose_record SET is_gg_marked = TRUE, gg_link = '{link}' WHERE id = {event_id} AND rel_module = '353947921997627395' AND is_gg_marked = FALSE;"
             )
             connection.commit()  # Commit the changes if successful
+            result = True
         except Exception as e:
             print(f"Error executing SQL query: {e}")
+            result = False
             connection.rollback()  # Rollback changes if an error occurred
-        
-        if connection.is_connected() and result:
-            print("Connected to the database.")
-            return result
 
 
     except mysql.connector.Error as err:
