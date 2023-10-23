@@ -44,12 +44,13 @@ def update_events(config: dict, event_id: str, link: str):
         cursor = connection.cursor()
 
         # Example: Execute a simple query
-        cursor.execute(f"UPDATE compose_record SET (is_gg_marked, gg_link) = (TRUE, {link}) WHERE id = {event_id}, rel_module = '353947921997627395' AND is_gg_marked = FALSE;")
+        cursor.execute(
+            f"UPDATE compose_record SET is_gg_marked = TRUE, gg_link = '{link}' WHERE id = {event_id} AND rel_module = '353947921997627395' AND is_gg_marked = FALSE;"
+        )
+
 
         # Fetch and print the results
-        result = cursor.fetchall()
-        for row in result:
-            print(row)
+        result = True
         
         if connection.is_connected() and result:
             print("Connected to the database.")
