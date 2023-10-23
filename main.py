@@ -36,10 +36,6 @@ def get_sql_events(config):
     try:
         # Connect to the database
         connection = mysql.connector.connect(**database_config)
-        
-        if connection.is_connected():
-            print("Connected to the database.")
-            return connection
 
         # Create a cursor object to execute SQL queries
         cursor = connection.cursor()
@@ -48,9 +44,11 @@ def get_sql_events(config):
         cursor.execute("SELECT cr.values FROM compose_record cr WHERE rel_module = '353947921997627395';")
 
         # Fetch and print the results
-        result = cursor.fetchall()
-        for row in result:
-            print(row)
+        if connection.is_connected():
+            print("Connected to the database.")
+            result = cursor.fetchall()
+            for row in result:
+                print(row)
 
     except mysql.connector.Error as err:
         print(f"Error: {err}")
