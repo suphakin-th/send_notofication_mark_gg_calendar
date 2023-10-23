@@ -23,7 +23,7 @@ def read_config(file_path):
         config = json.load(file)
     return config
 
-def update_events(config):
+def update_events(config: dict, event_id: str, link: str):
     result = None
     database_config = {
         'user': config['database']['user'],
@@ -42,7 +42,7 @@ def update_events(config):
         cursor = connection.cursor()
 
         # Example: Execute a simple query
-        cursor.execute("SELECT cr.id, cr.values FROM compose_record cr WHERE rel_module = '353947921997627395' AND is_gg_marked = FALSE;")
+        cursor.execute(f"UPDATE compose_record SET (is_gg_marked, gg_link) = (TRUE, {link}) WHERE id = {event_id}, rel_module = '353947921997627395' AND is_gg_marked = FALSE;")
 
         # Fetch and print the results
         result = cursor.fetchall()
@@ -155,28 +155,26 @@ def main():
         # Event from database
         for event in sql_events:
             link = None
-            print('events : ', event)
-            print('ID : ', event[0])
-            print('event : ', event[1])
+            event_id = str(event[0]).strip()
             event_data = json.loads(event[1])
             # filter only event that have ActivityDate and EndDateTime
             if event_data['ActivityDate'] and event_data['EndDateTime']:
                 print('RECORD_EVENT : ', event_data)
-                # link = create_event(
-                #     service = service, 
-                #     event_title = 'AUTO_EVENT : ' + event_data['Subject'] if event_data['Subject'] else 'AUTO_EVENT : NO SUBJECT', 
-                #     start_time = event_data['ActivityDate'],
-                #     end_time = event_data['EndDateTime'],
-                #     description = event_data['Description'],
-                #     guest_emails = event_data['ContactId'],
-                #     location = event_data['Location']
-                # )
+                link = create_event(
+                    service = service, 
+                    event_title = 'AUTO_EVENT : ' + event_data['Subject'] if event_data['Subject'] else 'AUTO_EVENT : NO SUBJECT', 
+                    start_time = event_data['ActivityDate'],
+                    end_time = event_data['EndDateTime'],
+                    description = event_data['Description'],
+                    guest_emails = event_data['ContactId'],
+                    location = event_data['Location']
+                )
             else:
                 continue
             # Update SQL
             if link:
-                pass
-                
+                status = update_events(config=config, event_id=event_id)
+                print(f'Event ID {event_id}, UPDATED') if status else print(f'Event ID {event_id}, Something wrong.')
     else:
         print("Get no data from connection")
     
