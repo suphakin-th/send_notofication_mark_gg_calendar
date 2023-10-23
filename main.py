@@ -1,20 +1,12 @@
 import uuid
 import os
 import json
-import pyodbc
-import datetime
+import mysql.connector
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 
-# # SQL Server Connection Settings
-# sql_server = 'your_sql_server'
-# database = 'your_database'
-# username = 'your_username'
-# password = 'your_password'
-
-# conn_str = f'DRIVER={{SQL Server}};SERVER={sql_server};DATABASE={database};UID={username};PWD={password}'
 
 # Google Calendar API Settings
 SCOPES = ['https://www.googleapis.com/auth/calendar']
@@ -70,7 +62,7 @@ def get_sql_events(config):
         if 'connection' in locals() and connection is not None:
             connection.close()
 
-    return events
+    return result
 
 def create_event(service, event_title, start_time, end_time, description, guest_emails):
     attendees = [{'email': email} for email in guest_emails]
