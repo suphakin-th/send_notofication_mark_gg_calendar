@@ -163,3 +163,4 @@ cython_debug/
 client_secret.json
 google_cloud_pass.txt
 client_secret_crm.json
+database_config.json
