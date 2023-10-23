@@ -8,6 +8,7 @@ def read_config(file_path):
 
 # Replace these values with your actual database credentials
 def connect_to_database(config):
+    connection = None
     database_config = {
         'user': config['database']['user'],
         'password': config['database']['password'],
@@ -20,10 +21,6 @@ def connect_to_database(config):
     try:
         # Connect to the database
         connection = mysql.connector.connect(**database_config)
-        
-        if connection.is_connected():
-            print("Connected to the database.")
-            return connection
 
         # Create a cursor object to execute SQL queries
         cursor = connection.cursor()
@@ -35,6 +32,10 @@ def connect_to_database(config):
         result = cursor.fetchall()
         for row in result:
             print(row)
+        
+        if connection.is_connected():
+            print("Connected to the database.")
+            return connection
 
     except mysql.connector.Error as err:
         print(f"Error: {err}")
@@ -45,6 +46,7 @@ def connect_to_database(config):
             cursor.close()
         if 'connection' in locals() and connection is not None:
             connection.close()
+    return connection
     
 def main():   
     # Read configuration from JSON file
@@ -59,6 +61,8 @@ def main():
     if connection:
         connection.close()
         print("Connection closed.")
+    else:
+        print("Can't Connection.")
 
 if __name__ == "__main__":
     main()

@@ -45,11 +45,14 @@ def get_sql_events(config):
         cursor.execute("SELECT cr.values FROM compose_record cr WHERE rel_module = '353947921997627395';")
 
         # Fetch and print the results
-        if connection.is_connected():
+        result = cursor.fetchall()
+        for row in result:
+            print(row)
+        
+        if connection.is_connected() and result:
             print("Connected to the database.")
-            result = cursor.fetchall()
-            for row in result:
-                print(row)
+            return result
+
 
     except mysql.connector.Error as err:
         print(f"Error: {err}")
@@ -57,7 +60,6 @@ def get_sql_events(config):
     finally:
         # Close the cursor and connection
         if 'cursor' in locals() and cursor is not None:
-            cursor.fetchall()
             cursor.close()
         if 'connection' in locals() and connection is not None:
             connection.close()
@@ -106,7 +108,10 @@ def main():
     # Get events from SQL Server
     config = read_config('database_config.json')
     sql_events = get_sql_events(config)
-    print(sql_events)
+    if sql_events:
+        pass
+    else:
+        print("Can't connect Database")
     
     # # Mock data for test
     # event_title = 'Meeting with SUPER VIP'
