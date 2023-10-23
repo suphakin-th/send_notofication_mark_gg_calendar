@@ -24,6 +24,7 @@ def read_config(file_path):
     return config
 
 def get_sql_events(config):
+    result = None
     database_config = {
         'user': config['database']['user'],
         'password': config['database']['password'],
@@ -60,7 +61,6 @@ def get_sql_events(config):
             cursor.close()
         if 'connection' in locals() and connection is not None:
             connection.close()
-
     return result
 
 def create_event(service, event_title, start_time, end_time, description, guest_emails):
