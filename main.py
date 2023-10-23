@@ -15,6 +15,7 @@ CLIENT_SECRET_FILE = 'client_secret_crm.json'
 API_NAME = 'calendar'
 API_VERSION = 'v3'
 CALENDAR_ID = 'system.evo.crm@gmail.com'
+os.chdir('/root/googleCalendar/send_notofication_mark_gg_calendar')
 
 def generate_unique_event_id():
     return str(uuid.uuid4())
