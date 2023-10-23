@@ -31,7 +31,8 @@ def connect_to_database(config):
         # Fetch and print the results
         result = cursor.fetchall()
         for row in result:
-            print(row)
+            event_data = json.loads(row[0])
+            print(event_data)
         
         if connection.is_connected():
             print("Connected to the database.")
