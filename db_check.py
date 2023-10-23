@@ -30,6 +30,7 @@ def connect_to_database(config):
 
         # Fetch and print the results
         result = cursor.fetchall()
+        print('result', result)
         for row in result:
             event_data = json.loads(row[0])
             print(event_data)
