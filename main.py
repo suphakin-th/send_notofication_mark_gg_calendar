@@ -47,11 +47,9 @@ def update_events(config: dict, event_id: str, link: str):
         cursor.execute(
             f"UPDATE compose_record SET is_gg_marked = TRUE, gg_link = '{link}' WHERE id = {event_id} AND rel_module = '353947921997627395' AND is_gg_marked = FALSE;"
         )
-        cursor.fetchall()
-
-
-        # Fetch and print the results
-        result = True
+        result = cursor.fetchall()
+        for row in result:
+            print(row)
         
         if connection.is_connected() and result:
             print("Connected to the database.")
