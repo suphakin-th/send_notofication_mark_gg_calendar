@@ -42,7 +42,7 @@ def get_sql_events(config):
         cursor = connection.cursor()
 
         # Example: Execute a simple query
-        cursor.execute("SELECT cr.values FROM compose_record cr WHERE rel_module = '353947921997627395';")
+        cursor.execute("SELECT cr.values FROM compose_record cr WHERE rel_module = '353947921997627395' AND is_gg_marked = FALSE;")
 
         # Fetch and print the results
         result = cursor.fetchall()
@@ -108,10 +108,18 @@ def main():
     # Get events from SQL Server
     config = read_config('database_config.json')
     sql_events = get_sql_events(config)
-    if sql_events:
-        pass
+    if sql_events and isinstance(sql_events, list) and len(sql_events )>=1 :
+        # Event from database
+        for event in sql_events:
+            event_data = json.loads(event[0])
+            # filter only event that have ActivityDate and EndDateTime
+            if event_data['ActivityDate'] and event_data['EndDateTime']:
+                print(event_data)
+            else:
+                continue
+            # create_event(service, event_title, start_time, end_time, description, guest_emails)
     else:
-        print("Can't connect Database")
+        print("Get no data from connection")
     
     # # Mock data for test
     # event_title = 'Meeting with SUPER VIP'

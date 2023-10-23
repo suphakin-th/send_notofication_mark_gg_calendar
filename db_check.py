@@ -26,7 +26,7 @@ def connect_to_database(config):
         cursor = connection.cursor()
 
         # Example: Execute a simple query
-        cursor.execute("SELECT cr.values FROM compose_record cr WHERE rel_module = '353947921997627395';")
+        cursor.execute("SELECT cr.values FROM compose_record cr WHERE rel_module = '353947921997627395' AND is_gg_marked = FALSE;")
 
         # Fetch and print the results
         result = cursor.fetchall()
