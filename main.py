@@ -173,7 +173,7 @@ def main():
                 continue
             # Update SQL
             if link:
-                status = update_events(config=config, event_id=event_id)
+                status = update_events(config=config, event_id=event_id, link=link)
                 print(f'Event ID {event_id}, UPDATED') if status else print(f'Event ID {event_id}, Something wrong.')
     else:
         print("Get no data from connection")
