@@ -85,7 +85,7 @@ def get_sql_events(config):
         cursor = connection.cursor()
 
         # Example: Execute a simple query
-        cursor.execute("SELECT cr.id, cr.values FROM compose_record cr WHERE rel_module = '353947921997627395' AND is_gg_marked = FALSE;")
+        cursor.execute("SELECT cr.id, cr.values, COALESCE((SELECT email from users where id = cr.owned_by), (SELECT email from users where id = cr.created_by)) AS owner_email FROM compose_record cr WHERE rel_module = '353947921997627395';")
 
         # Fetch and print the results
         result = cursor.fetchall()
@@ -167,7 +167,7 @@ def main():
                     start_time = event_data['ActivityDate'],
                     end_time = event_data['EndDateTime'],
                     description = event_data['Description'],
-                    guest_emails = event_data['ContactId'],
+                    guest_emails = [str(event[2]).strip()],
                     location = event_data['Location']
                 )
             else:
